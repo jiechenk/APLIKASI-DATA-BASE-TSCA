@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+	  <meta charset="UTF-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	  <title>Database TSCA</title>
+	  <link rel="icon" type="image/png" href="https://i.imgur.com/xNCFonB.png">
+	  <link rel="stylesheet" href="style.css"><!-- CSS eksternal -->
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="logo"> 
+				<img src="https://i.imgur.com/xNCFonB.png" alt="Logo">
+          </div>
+                <h1>Login Admin</h1>
+                <p>TROPIS SULAWESI CINTA ALAM </p>
+            </div>
+            
+            <div class="error-message" id="errorMessage">
+                Username atau password salah!
+            </div>
+            
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Masukkan username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Masukkan password" required>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    🔐 Login
+                </button>
+            </form>
+            
+            <div class="demo-credentials">
+                <h4>🔑</h4>
+                <strong>Username:</strong> <br>
+                <strong>Password:</strong>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application (hidden initially) -->
+    <div id="mainApp" class="main-app">
+        <div class="container">
+            <div class="header">
+                <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+                <h1> <img src="https://i.imgur.com/xNCFonB.png" alt="Logo"> 
+				<span class="title-text">TROPIS SULAWESI CINTA ALAM</span>
+				</h1>
+                <p>Sistem Manajemen Data Anggota & Kegiatan</p>			 
+            </div>
+        <div class="nav-tabs">
+            <button class="tab-button active" onclick="showTab('dashboard')">Dashboard</button>
+            <button class="tab-button" onclick="showTab('members')">Data Anggota</button>
+            <button class="tab-button" onclick="showTab('activities')">Kegiatan</button>
+            <button class="tab-button" onclick="showTab('equipment')">Peralatan</button>
+			<button class="tab-button" onclick="showTab('letters')">Surat</button>
+        </div>
+        <div class="content-area">
+			<!-- === Dashboard === -->
+				<div id="dashboard" class="tab-content active">
+				<h2>Dashboard</h2>
+				<div class="stats">
+				<div class="stat-card">👥 <br><span id="totalMembers">0</span><br>Anggota</div>
+				<div class="stat-card">📅 <br><span id="totalActivities">0</span><br>Kegiatan</div>
+				<div class="stat-card">🎒 <br><span id="totalEquipment">0</span><br>Peralatan</div>
+				<div class="stat-card">📩 <br><span id="totalLetters">0</span><br>Surat</div>
+				</div>
+				<br>
+				<button onclick="resetAllData()" style="background:#e74c3c;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;">🗑 Reset Semua Data</button>
+				<br><br>
+				<button onclick="backupData()" style="background:#27ae60;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;">⬇ Backup Data</button>
+				<input type="file" id="restoreFile" style="display:none" accept=".json" onchange="restoreData(event)">
+				<button onclick="document.getElementById('restoreFile').click()" style="background:#2980b9;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;">⬆ Restore Data</button>
+				</div>
+            <!-- Members Tab -->
+            <div id="members" class="tab-content">
+                <h2>Data Anggota</h2>
+                <div class="export-controls">
+                    <button class="btn btn-primary" onclick="showAddMemberModal()">+ Tambah Anggota</button>
+                    <button class="btn btn-success" onclick="exportToCSV('members')">📊 Export Semua CSV</button>
+                    <button class="btn btn-success" onclick="exportToExcel('members')">📈 Export Semua Excel</button>
+                    <button class="btn btn-success" onclick="exportSelectedMembers()">📊 Export Pilihan</button>
+                    <button class="btn btn-success" onclick="printMemberList()">🖨️ Print Semua</button>
+                    <button class="btn btn-success" onclick="printSelectedMembers()">🖨️ Print Pilihan</button>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" class="search-box" id="memberSearch" placeholder="Cari anggota..." onkeyup="searchMembers()" style="margin-bottom: 0;">
+                    <div class="selection-controls">
+                        <button class="btn btn-warning" onclick="selectAllMembers()">✅ Pilih Semua</button>
+                        <button class="btn btn-warning" onclick="unselectAllMembers()">❌ Batal Pilih</button>
+                        <span id="selectedCount" style="color: #4a7c59; font-weight: bold; margin-left: 10px;">0 dipilih</span>
+                    </div>
+                </div>            
+                <table class="data-table" id="membersTable">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"></th>
+                            <th>No</th>
+                            <th>Foto</th>
+                            <th>NAT</th>
+                            <th>Nama</th>
+							<th>TLL</th>
+                            <th>Email</th>
+                            <th>Telepon</th>
+                            <th>Alamat</th>
+                            <th>Golongan Darah</th>
+                            <th>Angkatan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="membersTableBody">
+                    </tbody>
+                </table>
+            </div>
+       <!-- Activities Tab -->
+            <div id="activities" class="tab-content">
+                <h2>Data Kegiatan</h2>
+                <div class="export-controls">
+                    <button class="btn btn-primary" onclick="showAddActivityModal()">+ Tambah Kegiatan</button>
+                    <button class="btn btn-success" onclick="exportToCSV('activities')">📊 Export CSV</button>
+                    <button class="btn btn-success" onclick="exportToExcel('activities')">📈 Export Excel</button>
+                    <button class="btn btn-success" onclick="printActivityList()">🖨️ Print</button>
+                </div>
+                
+                <input type="text" class="search-box" id="activitySearch" placeholder="Cari kegiatan..." onkeyup="searchActivities()">
+                
+                <table class="data-table" id="activitiesTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Kegiatan</th>
+                            <th>Tanggal</th>
+                            <th>Lokasi</th>
+                            <th>Peserta</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activitiesTableBody">
+                    </tbody>
+                </table>
+            </div>
+		<!-- === Equipment Tab === -->
+					<div id="equipment" class="tab-content">
+					<h2>Data Peralatan</h2>
+					<div class="export-controls">
+					<button class="btn btn-primary" onclick="showAddEquipmentModal()">+ Tambah Peralatan</button>
+					<button class="btn btn-success" onclick="exportToCSV('equipment')">📊 Export CSV</button>
+					<button class="btn btn-success" onclick="exportToExcel('equipment')">📈 Export Excel</button>
+					<button class="btn btn-success" onclick="printEquipmentList()">🖨️ Print Semua</button>
+					<button class="btn btn-success" onclick="printSelectedEquipment()">🖨️ Print Pilihan</button>
+					</div>
+					<div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
+					<input type="text" class="search-box" id="equipmentSearch" placeholder="Cari peralatan..." onkeyup="searchEquipment()" style="margin-bottom: 0;">
+					<div class="selection-controls">
+					<button class="btn btn-warning" onclick="selectAllEquipment()">✅ Pilih Semua</button>
+					<button class="btn btn-warning" onclick="unselectAllEquipment()">❌ Batal Pilih</button>
+					<span id="selectedEquipmentCount" style="color: #4a7c59; font-weight: bold; margin-left: 10px;">0 dipilih</span>
+					</div>
+					</div>
+					<table class="data-table" id="equipmentTable">
+					<thead>
+					<tr>
+						<th><input type="checkbox" id="selectAllEquipmentCheckbox" onchange="toggleSelectAllEquipment()"></th>
+							<th>No</th>
+							<th>Nama Peralatan</th>
+							<th>Kategori</th>
+							<th>Kondisi</th>
+							<th>Jumlah</th>
+							<th>Keterangan</th>
+							<th>Aksi</th>
+							</tr>
+					</thead>
+					<tbody id="equipmentTableBody">
+					</tbody>
+				</table>
+			</div>					
+       	<!-- === Letters Tab === -->
+				<div id="letters" class="tab-content">
+				  <h2>📩 Data Surat</h2>			  
+	         	<div style="margin-bottom:8px;">
+					  <button onclick="showAddLetterModal('in')" class="btn btn-primary">➕ Tambah Surat Masuk</button>
+					  <button onclick="showAddLetterModal('out')" class="btn btn-secondary">➕ Tambah Surat Keluar</button>
+					</div>
+		  <!-- Sub Tabs -->
+				  <div class="sub-tabs">
+					<button class="sub-tab-button active" onclick="showLetterCategory('in')">Surat Masuk</button>
+					<button class="sub-tab-button" onclick="showLetterCategory('out')">Surat Keluar</button>
+				  </div>
+		  <!-- Tombol Ekspor / Print -->
+				  <div class="export-controls">
+					<button class="btn btn-success" onclick="exportToCSV(currentLetterType)">📊 Export CSV</button>
+					<button class="btn btn-success" onclick="exportToExcel(currentLetterType)">📈 Export Excel</button>
+					<button class="btn btn-success" onclick="printLetterList(currentLetterType)">🖨️ Print Semua</button>
+					<button class="btn btn-success" onclick="printSelectedLetters(currentLetterType)">🖨️ Print Pilihan</button>
+				  </div>
+		  <!-- Pencarian & Seleksi -->
+				  <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
+					<input type="text" class="search-box" id="letterSearch" placeholder="Cari surat..." onkeyup="searchLetters()" style="margin-bottom: 0;">
+					<div class="selection-controls">
+					  <button class="btn btn-warning" onclick="selectAllLetters(currentLetterType)">✅ Pilih Semua</button>
+					  <button class="btn btn-warning" onclick="unselectAllLetters(type)">❌ Batal Pilih</button>
+					  <span id="selectedLettersCount" style="color: #4a7c59; font-weight: bold; margin-left: 10px;">0 dipilih</span>
+					</div>
+				  </div>
+		  <!-- ===== Surat Masuk ===== -->
+				  <div id="letters-in" class="letter-category active">
+					<table class="data-table" id="lettersInTable">
+					  <thead>
+						<tr>
+						  <th><input type="checkbox" id="selectAllIn" onchange="toggleSelectAll('in')"></th>
+						  <th>No</th>
+						  <th>Nomor Surat</th>
+						  <th>Tanggal Masuk</th>
+						  <th>Pengirim</th>
+						  <th>Perihal</th>
+						   <th>File PDF</th>  
+						  <th>Status</th>
+						  <th>Aksi</th>
+						</tr>
+					  </thead>
+						  <tbody id="lettersInBody">
+						</table>
+					  </div>
+		  <!-- ===== Surat Keluar ===== -->
+				  <div id="letters-out" class="letter-category">
+					<table class="data-table" id="lettersOutTable">
+					  <thead>
+						<tr>
+						  <th><input type="checkbox" id="selectAllOut" onchange="toggleSelectAll('out')"></th>
+						  <th>No</th>
+						  <th>Nomor Surat</th>
+						  <th>Tanggal Keluar</th>
+						  <th>Tujuan</th>
+						  <th>Perihal</th>
+						   <th>File PDF</th>  
+						  <th>Status</th>
+						  <th>Aksi</th>
+						</tr>
+					  </thead>
+						  <tbody id="lettersOutBody">
+						</table>
+				    </div>
+         </div><!-- END Letters -->
+       </div><!-- END content-area -->
+     </div><!-- END container -->
+   </div><!-- END mainApp -->
+	 <!-- === Modal Tambah Surat === -->
+		 <div id="addLetterModal" class="modal" style="display:none;">
+	     <div class="modal-content">
+						<span class="close" onclick="closeAddLetterModal()">&times;</span>
+						<h2>Tambah Surat</h2>
+
+						<form id="addLetterForm" onsubmit="addLetter(event)" class="form-grid">
+						  <div class="form-group">
+							<label for="letterNumber">Nomor Surat</label>
+							<input type="text" id="letterNumber" required>
+						  </div>
+
+						  <div class="form-group">
+							<label for="letterDate">Tanggal Masuk/Keluar</label>
+							<input type="date" id="letterDate" required>
+						  </div>
+
+						  <div class="form-group">
+							<label for="letterDestination">Tujuan / Pengirim</label>
+							<input type="text" id="letterDestination" required>
+						  </div>
+
+						  <div class="form-group full-width">
+							<label for="letterSubject">Perihal</label>
+							<input type="text" id="letterSubject" required>
+						  </div>
+
+						  <div class="form-group full-width">
+							<label for="letterPdf">Upload File PDF</label>
+							<input type="file" id="letterPdf" accept="application/pdf" required>
+						  </div>
+
+						  <div class="form-group">
+							<label for="letterStatus">Status</label>
+							<select id="letterStatus" required>
+							  <option value="Terkirim" selected>Terkirim</option>
+							  <option value="Proses">Proses</option>
+							  <option value="Draft">Draft</option>
+							</select>
+						  </div>
+
+						  <div class="form-actions">
+							<button type="submit" class="btn btn-primary">💾 Simpan</button>
+							<button type="button" class="btn btn-secondary" onclick="closeAddLetterModal()">Batal</button>
+						  </div>
+						</form>
+					  </div>
+		</div>
+	<!-- === Modal Edit Surat === -->
+		 <div id="editLetterModal" class="modal" style="display:none;">
+		 <div class="modal-content">
+				<span class="close" onclick="closeEditLetterModal()">&times;</span>
+				<h2>Edit Surat</h2>
+
+				<form id="editLetterForm" onsubmit="updateLetter(event)" class="form-grid">
+				  <input type="hidden" id="editLetterIndex">
+
+				  <div class="form-group">
+					<label for="editLetterNumber">Nomor Surat</label>
+					<input type="text" id="editLetterNumber" required>
+				  </div>
+
+				  <div class="form-group">
+					<label for="editLetterDate">Tanggal Masuk/Keluar</label>
+					<input type="date" id="editLetterDate" required>
+				  </div>
+
+				  <div class="form-group">
+					<label for="editLetterDestination">Tujuan / Pengirim</label>
+					<input type="text" id="editLetterDestination" required>
+				  </div>
+
+				  <div class="form-group full-width">
+					<label for="editLetterSubject">Perihal</label>
+					<input type="text" id="editLetterSubject" required>
+				  </div>
+
+				  <div class="form-group full-width">
+					<label for="editLetterPdf">Upload File PDF (opsional)</label>
+					<input type="file" id="editLetterPdf" accept="application/pdf">
+				  </div>
+
+				  <div class="form-group">
+					<label for="editLetterStatus">Status</label>
+					<select id="editLetterStatus" required>
+					  <option value="Terkirim">Terkirim</option>
+					  <option value="Proses">Proses</option>
+					  <option value="Draft">Draft</option>
+					</select>
+				  </div>
+
+				  <div class="form-actions">
+					<button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
+					<button type="button" class="btn btn-secondary" onclick="closeEditLetterModal()">Batal</button>
+				  </div>
+				</form>
+			  </div>
+		</div>
+	<!-- Modal Add/Edit Member -->
+		<div id="memberModal" class="modal">
+        <div class="modal-content">
+        <span class="close" onclick="closeMemberModal()">&times;</span>
+        <h2 id="memberModalTitle">Tambah Anggota</h2>
+         <form id="memberForm">
+         <input type="hidden" id="memberId">
+         <!-- Photo Upload Section -->
+         <div class="form-group">
+             <label>Foto Profil</label>
+             <div class="photo-upload-container" id="photoUploadContainer">
+                 <img id="photoPreview" class="photo-preview" alt="Preview">
+                 <div id="uploadPrompt">
+                     <p>📸 Klik untuk upload foto atau drag & drop</p>
+                     <button type="button" class="photo-upload-btn" onclick="document.getElementById('memberPhoto').click()">
+                         Pilih Foto
+                     </button>
+                 </div>
+                 <input type="file" id="memberPhoto" accept="image/*" style="display: none;">
+             </div>
+         </div>
+        <div class="form-row">
+        <div class="form-group">
+          <label>NAT (Nomor Anggota)</label>
+          <input type="text" id="memberNAT" placeholder="002/TSCA-MKS/90" required>
+          </div>
+        <div class="form-group">
+          <label>Nama Lengkap</label>
+          <input type="text" id="memberName" required>
+         </div>
+         </div>	   
+		<div class="form-row">
+		  <div class="form-group">
+			<label>Tempat Lahir</label>
+			<input type="text" id="memberBirthPlace" placeholder="Contoh: Makassar">
+		  </div>
+		  <div class="form-group">
+			<label>Tanggal Lahir</label>
+			<input type="date" id="memberBirthDate">
+		  </div>
+		</div>
+        <div class="form-row">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="memberEmail" required>
+        </div>
+        <div class="form-group">
+          <label>Nomor Telepon</label>
+          <input type="tel" id="memberPhone" required>
+        </div>
+       </div>
+	    <div class="form-group">
+		  <label>Golongan Darah</label>
+		  <select id="memberBlood" required>
+			<option value="A">A</option>
+			<option value="B">B</option>
+			<option value="AB">AB</option>
+			<option value="O">O</option>
+		  </select>
+		</div>		
+        <div class="form-group">
+          <label>Alamat</label>
+          <textarea id="memberAddress" rows="2"></textarea>
+        </div>
+		<div class="form-group">
+		  <label>Angkatan</label>
+		  <input type="text" id="memberJoinDate" placeholder="Contoh: Angkatan XII / 2025">
+		</div>
+       <button type="submit" class="btn btn-primary">Simpan</button>
+       <button type="button" class="btn btn-warning" onclick="closeMemberModal()">Batal</button>
+       </form>
+      </div>
+     </div>
+	<!-- Modal Add/Edit Activity -->
+	    <div id="activityModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeActivityModal()">&times;</span>
+            <h2 id="activityModalTitle">Tambah Kegiatan</h2>
+            <form id="activityForm">
+                <input type="hidden" id="activityId">
+                <div class="form-group">
+                    <label>Nama Kegiatan</label>
+                    <input type="text" id="activityName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tanggal</label>
+                        <input type="date" id="activityDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Lokasi</label>
+                        <input type="text" id="activityLocation" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Jumlah Peserta</label>
+                        <input type="number" id="activityParticipants" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="activityStatus" required>
+                            <option value="Direncanakan">Direncanakan</option>
+                            <option value="Berlangsung">Berlangsung</option>
+                            <option value="Selesai">Selesai</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi</label>
+                    <textarea id="activityDescription" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="button" class="btn btn-warning" onclick="closeActivityModal()">Batal</button>
+            </form>
+        </div>
+     </div>
+	  <!-- Modal Add/Edit Equipment -->	
+	   <div id="equipmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEquipmentModal()">&times;</span>
+            <h2 id="equipmentModalTitle">Tambah Peralatan</h2>
+            <form id="equipmentForm">
+                <input type="hidden" id="equipmentId">
+                <div class="form-group">
+                    <label>Nama Peralatan</label>
+                    <input type="text" id="equipmentName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <select id="equipmentCategory" required>
+                            <option value="Hiking">Hiking</option>
+                            <option value="Camping">Camping</option>
+                            <option value="Climbing">Climbing</option>
+                            <option value="Navigation">Navigation</option>
+                            <option value="Safety">Safety</option>
+                            <option value="Cooking">Cooking</option>
+                        </select>
+                    </div>
+                   <div class="form-group">
+                        <label>Kondisi</label>
+                        <select id="equipmentCondition" required>
+                            <option value="Baik">Baik</option>
+                            <option value="Rusak Ringan">Rusak Ringan</option>
+                            <option value="Rusak Berat">Rusak Berat</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah</label>
+                    <input type="number" id="equipmentQuantity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Keterangan</label>
+                    <textarea id="equipmentNotes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="button" class="btn btn-warning" onclick="closeEquipmentModal()">Batal</button>
+            </form>
+         </div>
+      </div>
+  <script src="script.js"></script><!-- JS eksternal -->
+</body>
+</html>
